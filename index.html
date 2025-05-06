@@ -227,7 +227,9 @@
       <button onclick="showHelp()" style="font-size: 0.8em; margin-left: 10px; display: none;">❓ Help</button>
     </h1>
     <div>
-      <button style="background-color: chartreuse; border: none; padding: 10px; border-radius: 10px;"><a style="text-decoration: none; color: rgb(0, 0, 0);" href="pre.html">Premium</a></button>
+      <button style="background-color: chartreuse; border: none; padding: 10px; border-radius: 10px;">
+        <a style="text-decoration: none; color: rgb(0, 0, 0);" href="pre.html">Premium</a>
+      </button>
       <button style="display: none;" onclick="toggleDarkMode()">🌗 Toggle Theme</button>
       <button style="display: none;" onclick="exportData()">Export</button>
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
@@ -244,36 +246,55 @@
   <script>
     let appData = [];
 
-    // Initialization with localStorage priority
+    // Merge helper: merges baseData (from data.json) with localData (from localStorage)
+    function mergeData(baseData, localData) {
+      // Index local items by id
+      const localIndex = localData.reduce((idx, item) => {
+        idx[item.id] = item;
+        return idx;
+      }, {});
+
+      // 1) Keep every base item, but if overridden locally, use local version
+      const merged = baseData.map(base =>
+        localIndex[base.id]
+          ? { ...base, ...localIndex[base.id] }
+          : base
+      );
+
+      // 2) Append items that exist locally but not in base
+      const baseIds = new Set(baseData.map(i => i.id));
+      const extras = localData.filter(item => !baseIds.has(item.id));
+
+      return merged.concat(extras);
+    }
+
+    // Initialization: always fetch data.json, merge with localStorage, persist, then render
     (async function init() {
       try {
-        // 1. First try localStorage
-        const savedData = localStorage.getItem('questionBank');
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          if (validateData(parsedData)) {
-            appData = parsedData;
-            render();
-            return;
-          }
-        }
-
-        // 2. Fallback to data.json
+        // 1. Fetch base data.json
         const response = await fetch('data.json');
         if (!response.ok) throw new Error('data.json not found');
-        const jsonData = await response.json();
-        if (!validateData(jsonData)) throw new Error('Invalid data.json format');
+        const baseData = await response.json();
+        if (!validateData(baseData)) throw new Error('Invalid data.json format');
 
-        // 3. Store in localStorage and load
-        localStorage.setItem('questionBank', JSON.stringify(jsonData));
-        appData = jsonData;
+        // 2. Read localStorage
+        const savedRaw = localStorage.getItem('questionBank');
+        const localData = savedRaw ? JSON.parse(savedRaw) : [];
+
+        // 3. Merge
+        appData = mergeData(baseData, localData);
+
+        // 4. Persist merged
+        localStorage.setItem('questionBank', JSON.stringify(appData));
+
+        // 5. Render UI
         render();
-        
+
       } catch (error) {
         console.error('Initialization error:', error.message);
-        // 4. Fallback to empty state
-        appData = [];
-        localStorage.removeItem('questionBank');
+        // Fallback: purely localStorage or empty
+        const fallback = localStorage.getItem('questionBank');
+        appData = fallback ? JSON.parse(fallback) : [];
         render();
       }
     })();
@@ -281,12 +302,12 @@
     function validateData(data) {
       try {
         return Array.isArray(data) && data.every(item => {
-          const validFolder = item.type === 'folder' && 
-                            Array.isArray(item.children) &&
-                            typeof item.expanded === 'boolean';
-          const validLink = item.type === 'link' && 
-                           typeof item.url === 'string' &&
-                           typeof item.name === 'string';
+          const validFolder = item.type === 'folder' &&
+                              Array.isArray(item.children) &&
+                              typeof item.expanded === 'boolean';
+          const validLink   = item.type === 'link' &&
+                              typeof item.url === 'string' &&
+                              typeof item.name === 'string';
           return item.id && item.name && (validFolder || validLink);
         });
       } catch (e) {
@@ -320,9 +341,6 @@
           <span contenteditable="false" onblur="updateName('${folder.id}', this.textContent)">
             ${folder.name}
           </span>
-         <!-- <i class="fa fa-trash" onclick="deleteItem('${folder.id}')"></i>
-          <button onclick="addFolder('${folder.id}')">+ Folder</button>
-          <button onclick="addLink('${folder.id}')">+ Link</button>-->
         </h3>
         <div class="children" ${!folder.expanded ? 'style="display:none"' : ''}></div>
       `;
@@ -346,11 +364,10 @@
       linkElement.className = 'card link';
       linkElement.innerHTML = `
         <h3>
-          <span contenteditable="flase" onblur="updateName('${link.id}', this.textContent)">
+          <span contenteditable="false" onblur="updateName('${link.id}', this.textContent)">
             ${link.name}
           </span>
           <a href="${link.url}" target="_blank"><i class="fa fa-external-link-alt"></i></a>
-          <!--<i class="fa fa-trash" onclick="deleteItem('${link.id}')"></i>-->
         </h3>
       `;
       container.appendChild(linkElement);
@@ -417,7 +434,6 @@
 
     function deleteItem(id) {
       if (!confirm('Are you sure you want to delete this item?')) return;
-      
       function removeFromParent(parent, childId) {
         const index = parent.findIndex(child => child.id === childId);
         if (index !== -1) {
@@ -431,7 +447,6 @@
         }
         return false;
       }
-      
       if (removeFromParent(appData, id)) {
         saveData();
       } else {
@@ -469,7 +484,6 @@
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -477,11 +491,8 @@
           if (!validateData(importedData)) {
             throw new Error('Invalid file structure');
           }
-          
-          // Update localStorage and reload
           localStorage.setItem('questionBank', JSON.stringify(importedData));
           window.location.reload();
-          
         } catch (error) {
           alert(`Import Failed: ${error.message}`);
           console.error('Import error:', error);
@@ -540,7 +551,7 @@
     }
 
     document.querySelectorAll('[contenteditable]').forEach(element => {
-      element.addEventListener('touchstart', (e) => {
+      element.addEventListener('touchstart', e => {
         e.preventDefault();
         element.focus();
       });
