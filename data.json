@@ -32,6 +32,13 @@
         "children": []
       },
       {
+        "id": "subfolder2",
+        "name": "Define signal and explain analog and digital signal",
+        "type": "folder",
+        "expanded": false,
+        "children": []
+      },
+      {
         "id": "subfolder3",
         "name": "Difference of analogue and digital",
         "type": "folder",
