@@ -32,13 +32,6 @@
         "children": []
       },
       {
-        "id": "subfolder2",
-        "name": "Define signal and explain analog and digital signal",
-        "type": "folder",
-        "expanded": false,
-        "children": []
-      },
-      {
         "id": "subfolder3",
         "name": "Difference of analogue and digital",
         "type": "folder",
@@ -149,7 +142,7 @@
     "id": "chapter6",
     "name": "\n            \n            \n            \n            Chapter 6\n          \n          \n          \n          ",
     "type": "folder",
-    "expanded": false,
+    "expanded": true,
     "children": [
       {
         "id": "chapter6-link1",
@@ -216,6 +209,27 @@
       {
         "id": "macklpy3xyqum86zi",
         "name": "Significance of network protocol",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "madire31z1lirwxke",
+        "name": "Methodologies in Network Protocol Testing",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "madjuim894kszfpr5",
+        "name": "Challenges in Network Protocol Testing",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "madjvdbmgn3njj4ly",
+        "name": "Tools for Network Protocol Testing READ ONLY",
         "type": "folder",
         "children": [],
         "expanded": false
