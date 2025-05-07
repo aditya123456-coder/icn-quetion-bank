@@ -75,6 +75,7 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       color: var(--secondary);
       margin: 10px 0;
+      animation: fadeIn 0.5s ease forwards;
     }
 
     .card h3 {
@@ -105,10 +106,6 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card {
-      animation: fadeIn 0.5s ease forwards;
     }
 
     #helpOverlay {
@@ -200,7 +197,7 @@
       }
       
       .link a {
-        word-break: break-all;
+        word-break: break-word;
         font-size: 0.8rem;
       }
       
@@ -215,113 +212,46 @@
   <div id="helpOverlay">
     <div style="background: white; padding: 20px; margin: 50px auto; width: 80%; max-width: 600px; border-radius: 10px;">
       <h2>📚 How to Use</h2>
-      <p>1. Click <button style="padding: 5px 10px">Import</button> to load your notes</p>
+      <p>1. This app always loads fresh data from <code>data.json</code> on each reload.</p>
       <p>2. Download sample file: <button onclick="downloadSample()">Download Example.json</button></p>
-      <p>3. Drag & drop JSON files anywhere to import</p>
       <button onclick="closeHelp()" style="margin-top: 20px">Close Help</button>
     </div>
   </div>
 
   <header>
-    <h1><i class="fa-solid fa-folder-open"></i> Question Bank 
-      <button onclick="showHelp()" style="font-size: 0.8em; margin-left: 10px; display: none;">❓ Help</button>
-    </h1>
+    <h1><i class="fa-solid fa-folder-open"></i> Question Bank</h1>
     <div>
       <button style="background-color: chartreuse; border: none; padding: 10px; border-radius: 10px;">
         <a style="text-decoration: none; color: rgb(0, 0, 0);" href="pre.html">Premium</a>
       </button>
-      <button style="display: none;" onclick="toggleDarkMode()">🌗 Toggle Theme</button>
-      <button style="display: none;" onclick="exportData()">Export</button>
-      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
-      <button style="display: none;" onclick="document.getElementById('importFile').click()">Import</button>
     </div>
   </header>
 
   <main class="container" id="questionContainer"></main>
 
-  <div style="display: none;" class="fab" onclick="addParentFolder()">
-    <i class="fa fa-plus"></i>
-  </div>
-
   <script>
     let appData = [];
 
-    // Merge helper: merges baseData (from data.json) with localData (from localStorage)
-    function mergeData(baseData, localData) {
-      // Index local items by id
-      const localIndex = localData.reduce((idx, item) => {
-        idx[item.id] = item;
-        return idx;
-      }, {});
-
-      // 1) Keep every base item, but if overridden locally, use local version
-      const merged = baseData.map(base =>
-        localIndex[base.id]
-          ? { ...base, ...localIndex[base.id] }
-          : base
-      );
-
-      // 2) Append items that exist locally but not in base
-      const baseIds = new Set(baseData.map(i => i.id));
-      const extras = localData.filter(item => !baseIds.has(item.id));
-
-      return merged.concat(extras);
-    }
-
-    // Initialization: always fetch data.json, merge with localStorage, persist, then render
-    (async function init() {
+    async function init() {
       try {
-        // 1. Fetch base data.json
-        const response = await fetch('data.json');
+        const response = await fetch(`data.json?ts=${Date.now()}`);
         if (!response.ok) throw new Error('data.json not found');
-        const baseData = await response.json();
-        if (!validateData(baseData)) throw new Error('Invalid data.json format');
-
-        // 2. Read localStorage
-        const savedRaw = localStorage.getItem('questionBank');
-        const localData = savedRaw ? JSON.parse(savedRaw) : [];
-
-        // 3. Merge
-        appData = mergeData(baseData, localData);
-
-        // 4. Persist merged
-        localStorage.setItem('questionBank', JSON.stringify(appData));
-
-        // 5. Render UI
+        const data = await response.json();
+        if (!validateData(data)) throw new Error('Invalid format');
+        appData = data;
         render();
-
       } catch (error) {
-        console.error('Initialization error:', error.message);
-        // Fallback: purely localStorage or empty
-        const fallback = localStorage.getItem('questionBank');
-        appData = fallback ? JSON.parse(fallback) : [];
-        render();
+        console.error('Load error:', error.message);
+        document.getElementById('questionContainer').innerHTML = `<p style="color:red;">Error loading data.json</p>`;
       }
-    })();
+    }
 
     function validateData(data) {
-      try {
-        return Array.isArray(data) && data.every(item => {
-          const validFolder = item.type === 'folder' &&
-                              Array.isArray(item.children) &&
-                              typeof item.expanded === 'boolean';
-          const validLink   = item.type === 'link' &&
-                              typeof item.url === 'string' &&
-                              typeof item.name === 'string';
-          return item.id && item.name && (validFolder || validLink);
-        });
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function generateId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    }
-
-    function saveData() {
-      localStorage.setItem('questionBank', JSON.stringify(appData));
-      render();
+      return Array.isArray(data) && data.every(item => {
+        const isFolder = item.type === 'folder' && Array.isArray(item.children) && typeof item.expanded === 'boolean';
+        const isLink = item.type === 'link' && typeof item.url === 'string' && typeof item.name === 'string';
+        return item.id && item.name && (isFolder || isLink);
+      });
     }
 
     function render() {
@@ -338,16 +268,12 @@
           <span class="toggle" onclick="toggleFolder('${folder.id}')">
             ${folder.expanded ? '▼' : '▶'}
           </span>
-          <span contenteditable="false" onblur="updateName('${folder.id}', this.textContent)">
-            ${folder.name}
-          </span>
+          <span>${folder.name}</span>
         </h3>
         <div class="children" ${!folder.expanded ? 'style="display:none"' : ''}></div>
       `;
-
       const childrenContainer = folderElement.querySelector('.children');
       container.appendChild(folderElement);
-
       if (folder.expanded && folder.children) {
         folder.children.forEach(child => {
           if (child.type === 'folder') {
@@ -364,57 +290,18 @@
       linkElement.className = 'card link';
       linkElement.innerHTML = `
         <h3>
-          <span contenteditable="false" onblur="updateName('${link.id}', this.textContent)">
-            ${link.name}
-          </span>
+          <span>${link.name}</span>
           <a href="${link.url}" target="_blank"><i class="fa fa-external-link-alt"></i></a>
         </h3>
       `;
       container.appendChild(linkElement);
     }
 
-    function addParentFolder() {
-      const newFolder = {
-        id: generateId(),
-        name: 'New Parent Folder',
-        type: 'folder',
-        children: [],
-        expanded: false
-      };
-      appData.push(newFolder);
-      saveData();
-    }
-
-    function addFolder(parentId) {
-      const newFolder = {
-        id: generateId(),
-        name: 'New Folder',
-        type: 'folder',
-        children: [],
-        expanded: false
-      };
-      const parent = findItem(parentId);
-      if (parent) {
-        parent.children.push(newFolder);
-        saveData();
-      }
-    }
-
-    function addLink(parentId) {
-      const url = prompt('Enter the URL:');
-      if (url) {
-        const name = prompt('Enter the link name:') || 'New Link';
-        const newLink = {
-          id: generateId(),
-          name: name,
-          type: 'link',
-          url: url
-        };
-        const parent = findItem(parentId);
-        if (parent) {
-          parent.children.push(newLink);
-          saveData();
-        }
+    function toggleFolder(id) {
+      const item = findItem(id);
+      if (item) {
+        item.expanded = !item.expanded;
+        render();
       }
     }
 
@@ -432,88 +319,6 @@
       return search(appData);
     }
 
-    function deleteItem(id) {
-      if (!confirm('Are you sure you want to delete this item?')) return;
-      function removeFromParent(parent, childId) {
-        const index = parent.findIndex(child => child.id === childId);
-        if (index !== -1) {
-          parent.splice(index, 1);
-          return true;
-        }
-        for (const child of parent) {
-          if (child.type === 'folder' && child.children) {
-            if (removeFromParent(child.children, childId)) return true;
-          }
-        }
-        return false;
-      }
-      if (removeFromParent(appData, id)) {
-        saveData();
-      } else {
-        alert('Item not found!');
-      }
-    }
-
-    function toggleFolder(id) {
-      const folder = findItem(id);
-      if (folder) {
-        folder.expanded = !folder.expanded;
-        saveData();
-      }
-    }
-
-    function updateName(id, newName) {
-      const item = findItem(id);
-      if (item) {
-        item.name = newName;
-        saveData();
-      }
-    }
-
-    function exportData() {
-      const dataStr = JSON.stringify(appData, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'questionBank.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          if (!validateData(importedData)) {
-            throw new Error('Invalid file structure');
-          }
-          localStorage.setItem('questionBank', JSON.stringify(importedData));
-          window.location.reload();
-        } catch (error) {
-          alert(`Import Failed: ${error.message}`);
-          console.error('Import error:', error);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      if (document.body.classList.contains('dark')) {
-        document.documentElement.style.setProperty('--background', '#121212');
-        document.documentElement.style.setProperty('--card-bg', 'rgba(30, 30, 30, 0.85)');
-        document.documentElement.style.setProperty('--secondary', '#ecf0f1');
-      } else {
-        document.documentElement.style.setProperty('--background', '#f0f0f0');
-        document.documentElement.style.setProperty('--card-bg', 'rgba(255, 255, 255, 0.25)');
-        document.documentElement.style.setProperty('--secondary', '#2c3e50');
-      }
-    }
-
     function showHelp() {
       document.getElementById('helpOverlay').style.display = 'block';
     }
@@ -521,13 +326,6 @@
     function closeHelp() {
       document.getElementById('helpOverlay').style.display = 'none';
     }
-
-    document.body.addEventListener('dragover', e => e.preventDefault());
-    document.body.addEventListener('drop', e => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (file) importData({ target: { files: [file] } });
-    });
 
     function downloadSample() {
       const sampleData = [{
@@ -550,12 +348,7 @@
       a.click();
     }
 
-    document.querySelectorAll('[contenteditable]').forEach(element => {
-      element.addEventListener('touchstart', e => {
-        e.preventDefault();
-        element.focus();
-      });
-    });
+    init();
   </script>
 </body>
 </html>
