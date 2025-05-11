@@ -132,9 +132,51 @@
     "children": [
       {
         "id": "chapter5-link1",
-        "name": "ChatGPT Link 1",
+        "name": "Easy language link",
         "type": "link",
         "url": "https://chatgpt.com/share/67fe2069-37b0-8013-b882-ab1d340bb376"
+      },
+      {
+        "id": "majajhhx5938ymcja",
+        "name": "Ipv4 RECOMMENDED ",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "majcpqeitrfb46jxk",
+        "name": "IPv6 ONLY READ AND PREPARE DIAGRAM ",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "majf8icsfe2genx0u",
+        "name": "All classes A,B,C,D And E and also what is classfull adressing RECOMMENDED",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "majl6mpkj6wsbvh19",
+        "name": "Subnating network ONLY READ",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "majl7s3rcaq3thwld",
+        "name": "What is MAC address reason to have both IP and MAC address format of MAC address",
+        "type": "folder",
+        "children": [],
+        "expanded": false
+      },
+      {
+        "id": "majo27zp229oyakve",
+        "name": "DNS RECOMMENDED",
+        "type": "folder",
+        "children": [],
+        "expanded": false
       }
     ]
   },
@@ -142,7 +184,7 @@
     "id": "chapter6",
     "name": "\n            \n            \n            \n            Chapter 6\n          \n          \n          \n          ",
     "type": "folder",
-    "expanded": true,
+    "expanded": false,
     "children": [
       {
         "id": "chapter6-link1",
