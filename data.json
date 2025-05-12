@@ -12,12 +12,6 @@
         "url": "https://drive.google.com/file/d/1d0dPia2Sc0qghEKrDqjNA9sYMcxVC4ur/view?usp=drivesdk"
       },
       {
-        "id": "chapter1-link2",
-        "name": "\n            ChatGPT Link 1\n          ",
-        "type": "link",
-        "url": "https://chatgpt.com/share/67fe0776-1b6c-800e-bd1c-ad9ccfc89d33"
-      },
-      {
         "id": "subfolder1",
         "name": "What is communication and importance of communication in computer network",
         "type": "folder",
@@ -79,12 +73,18 @@
         "type": "folder",
         "expanded": false,
         "children": []
+      },
+      {
+        "id": "maks17pgw839b87nd",
+        "name": "easy language chapter 1",
+        "type": "link",
+        "url": "https://chatgpt.com/share/6821a66f-18ec-8005-ae3b-c35cf41ca895"
       }
     ]
   },
   {
     "id": "chapter2",
-    "name": "\n            Chapter 2\n          ",
+    "name": "Chapter 2",
     "type": "folder",
     "expanded": false,
     "children": [
@@ -112,7 +112,7 @@
   },
   {
     "id": "chapter4",
-    "name": "\n            \n            Chapter 4\n          \n          ",
+    "name": "Chapter 4",
     "type": "folder",
     "expanded": false,
     "children": [
@@ -132,51 +132,9 @@
     "children": [
       {
         "id": "chapter5-link1",
-        "name": "Easy language link",
+        "name": "ChatGPT Link 1",
         "type": "link",
         "url": "https://chatgpt.com/share/67fe2069-37b0-8013-b882-ab1d340bb376"
-      },
-      {
-        "id": "majajhhx5938ymcja",
-        "name": "Ipv4 RECOMMENDED ",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "majcpqeitrfb46jxk",
-        "name": "IPv6 ONLY READ AND PREPARE DIAGRAM ",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "majf8icsfe2genx0u",
-        "name": "All classes A,B,C,D And E and also what is classfull adressing RECOMMENDED",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "majl6mpkj6wsbvh19",
-        "name": "Subnating network ONLY READ",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "majl7s3rcaq3thwld",
-        "name": "What is MAC address reason to have both IP and MAC address format of MAC address",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "majo27zp229oyakve",
-        "name": "DNS RECOMMENDED",
-        "type": "folder",
-        "children": [],
-        "expanded": false
       }
     ]
   },
@@ -251,27 +209,6 @@
       {
         "id": "macklpy3xyqum86zi",
         "name": "Significance of network protocol",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "madire31z1lirwxke",
-        "name": "Methodologies in Network Protocol Testing",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "madjuim894kszfpr5",
-        "name": "Challenges in Network Protocol Testing",
-        "type": "folder",
-        "children": [],
-        "expanded": false
-      },
-      {
-        "id": "madjvdbmgn3njj4ly",
-        "name": "Tools for Network Protocol Testing READ ONLY",
         "type": "folder",
         "children": [],
         "expanded": false
